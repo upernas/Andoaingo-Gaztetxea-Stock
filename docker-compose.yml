@@ -1,0 +1,57 @@
+# Gaztetxe Stock · despliegue en la máquina virtual del gaztetxe
+#   cp .env.example .env   (y cambia las contraseñas)
+#   docker compose up -d --build
+# App en http://IP-DE-LA-VM:8080
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: gaztetxe
+      POSTGRES_USER: gaztetxe
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?pon DB_PASSWORD en .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gaztetxe -d gaztetxe"]
+      interval: 10s
+      retries: 10
+
+  backend:
+    build: { context: ., dockerfile: backend/Dockerfile }
+    restart: unless-stopped
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      DATABASE_URL: postgres://gaztetxe:${DB_PASSWORD}@db:5432/gaztetxe
+      APP_PASSWORD: ${APP_PASSWORD:?pon APP_PASSWORD en .env}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
+      TOKEN_SECRET: ${TOKEN_SECRET:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      SEED_ON_EMPTY: "true"
+
+  frontend:
+    build: { context: ., dockerfile: frontend/Dockerfile }
+    restart: unless-stopped
+    depends_on: [backend]
+    ports:
+      - "${HTTP_PORT:-8080}:80"
+
+  # copia de seguridad diaria (pg_dump comprimido) en ./backups, se guardan 30 días
+  backup:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      PGPASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./backups:/backups
+    entrypoint: >
+      sh -c 'while true; do
+        pg_dump -h db -U gaztetxe gaztetxe | gzip > /backups/gaztetxe-$$(date +%F-%H%M).sql.gz &&
+        find /backups -name "*.sql.gz" -mtime +30 -delete;
+        sleep 86400; done'
+
+volumes:
+  pgdata:
