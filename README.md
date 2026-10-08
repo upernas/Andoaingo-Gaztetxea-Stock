@@ -46,7 +46,12 @@ Datu-basea hutsik badago, backendak taulak sortzen ditu eta hasierako produktuak
 
 ## 4. Frontenda argitaratu
 
-- **GitHub Pages**: `.github/workflows/pages.yml` (Settings → Pages → GitHub Actions). Backenda badago, `API_URL` aldagaia definitu.
+- **GitHub Pages (beste mugikor batetik probatzeko)**: argitaratzeko prest dagoen bertsioa `docs/` karpetan dago.
+  1. Igo repo osoa GitHub-era (`docs/` barne).
+  2. GitHub → *Settings → Pages → Build and deployment → Source: Deploy from a branch* → `main` / `/docs` → *Save*.
+  3. Minutu batzuk barru: `https://upernas.github.io/Andoaingo-Gaztetxea-Stock/`.
+  4. Kodea aldatu ondoren, berriro sortu: `cd frontend && npm install && npm run build:pages` eta igo `docs/`.
+  - Garrantzitsua: Pages bertsioan datuak **mugikor bakoitzean** gordetzen dira (ez dira mugikorren artean partekatzen). Datuak partekatzeko: Claude artifacta edo gaztetxeko zerbitzaria (Ezarpenak → Datuak eta konexioa).
 - **Edozein hosting estatiko**: `cd frontend && npx vite build` → `frontend/dist/`.
 - **Claude artifacta**: `npx vite build --mode artifact` → `frontend/dist-artifact/index.html`.
 
@@ -127,5 +132,3 @@ Taldearen pasahitza eta aukerako administratzaile-pasahitza; HTTPS kanpotik sart
 **Etorkizunerako**: iragarpena jende kopuruaren arabera ere; zonaka zenbatzea pertsona batek baino gehiagok; barra-kodeen eskanerra; prezioen historia.
 
 Prezioak 2026ko albaranetatik daude eta **berretsi gabe** markatuta (albaranak ez daude eguneratuta). Erosketen historia ez da kargatu.
-#   A n d o a i n g o - G a z t e t x e a - S t o c k  
- 
